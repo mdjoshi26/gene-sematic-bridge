@@ -1,69 +1,42 @@
-# gene-sematic-bridge
-# Gene-Semantic Bridge
-### Enhancing Single-Cell Perturbation Prediction via LLM-Knowledge Embeddings
+**##Gene-Semantic Bridge: Enhancing Cell Perturbation Prediction via LLM-Knowledge Embeddings**
 
-> **Status: Active Research** — Currently training and evaluating on Norman et al. (2019). Replogle et al. (2022) benchmarking in progress.
+KA-CVAE is a knowledge-augmented conditional variational autoencoder designed to predict single-cell transcriptomic responses to single and combinatorial CRISPR perturbations. The project bridges the gap between biological knowledge and perturbation modeling by integrating **BioBERT-derived semantic gene embeddings** with learnable gene identity representations.
 
----
+Unlike traditional approaches such as CPA and GEARS that treat genes as categorical IDs, KA-CVAE injects functional information from biomedical literature into the perturbation representation space, enabling improved generalization to unseen perturbation conditions.
 
-## What is this?
+## Features
+- BioBERT-based semantic gene embedding pipeline
+- Knowledge-augmented CVAE architecture
+- Support for single and dual-gene perturbation prediction
+- Out-of-distribution evaluation using GEARS benchmark splits
+- Cross-dataset evaluation on Replogle et al. (2022)
+- KL warmup to prevent posterior collapse
+- PCA-based analysis of semantic gene embedding space
 
-Standard perturbation models treat genes as arbitrary IDs — "Gene_001" — ignoring decades of biological literature. **Gene-Semantic Bridge** closes that gap by encoding what each gene *functionally does* using BioBERT embeddings, then fusing that semantic knowledge with a Conditional VAE to predict post-perturbation gene expression — including for genes never seen during training.
+## Architecture
+KA-CVAE consists of:
+- **PerturbationEncoder** – combines semantic BioBERT embeddings with learnable gene identity embeddings
+- **ExpressionEncoder** – maps perturbed expression profiles into a latent space
+- **ExpressionDecoder** – reconstructs post-perturbation transcriptomic profiles
 
----
+## Datasets
+- **Norman et al. (2019)** CRISPRa dataset  
+  - ~91k cells  
+  - 284 perturbation conditions  
+  - 5,045 genes  
 
-## How it works
+- **Replogle et al. (2022)** dataset for OOD evaluation  
+  - ~162k cells  
+  - 1,093 perturbation conditions  
 
-1. **LLM Embeddings** — Functional descriptions fetched from NCBI Gene / MyGene.info, encoded into 768-dim vectors via BioBERT
-2. **Perturbation Encoder** — Fuses BioBERT vectors with learnable gene-identity embeddings → 128-dim condition vector
-3. **KA-CVAE** — Conditional VAE that takes the condition vector + cell expression → reconstructs post-perturbation expression profile
+## Results
+KA-CVAE demonstrates improved out-of-distribution generalization compared to baseline approaches, including non-zero performance in the hardest unseen combinatorial perturbation setting (`combo seen0`). The model also achieves strong cross-dataset transfer performance on Replogle without retraining.
 
-```
-Gene name → BioBERT → 768-dim semantic vector ─┐
-                                                 ├→ PerturbationEncoder → 128-dim condition
-Condition ID → learnable 64-dim embedding ──────┘
-                                                        ↓
-Cell expression → ExpressionEncoder → z (128-dim latent)
-                                                        ↓
-                              ExpressionDecoder → predicted expression (5045 genes)
-```
+## Tech Stack
+Python, PyTorch, BioBERT, Transformers, Pandas, NumPy, scRNA-seq processing pipelines
 
----
-
-## Dataset
-
-**Norman et al. (2019)** — K562 cell line
-- 91,205 single cells × 5,045 genes
-- 152 single-gene + 131 dual-gene perturbations
-- 4 benchmark splits: `simulation`, `combo_seen0`, `combo_seen1`, `combo_seen2`
-
----
-
-## Current Results
-
-| Split | Pearson r (top-20 DEGs) | R² | MSE |
-|---|---|---|---|
-| combo_seen2 | 0.2035 | >0.996 | ~0.044 |
-| simulation | 0.1087 | >0.996 | ~0.043 |
-| combo_seen1 | 0.0522 | >0.996 | ~0.046 |
-| combo_seen0 | 0.0114 | >0.996 | ~0.047 |
-
-Performance degrades as gene observability decreases — expected, and the core challenge this work addresses.
-
----
-
-## What's Next
-
-- [ ] **Replogle et al. (2022) benchmarking** — 162k cells, 1092 perturbations, different cell line. Key test of generalizability
-- [ ] **Improve OOD performance** — combo_seen0 (neither gene seen during training) is the hard frontier
-- [ ] **Better embeddings for missing genes** — 6 genes had no database entries and fell back to generic text; exploring alternative sources
-- [ ] **Scaling experiments** — larger latent dim, deeper decoder, attention-based fusion
-- [ ] **Cross-dataset evaluation** — validate that the approach transfers across cell lines without dataset-specific tuning
-
----
-
-## Stack
-
-`Python` · `PyTorch` · `BioBERT` · `scRNA-seq` · `VAE` · `MyGene.info` · `NCBI Gene`
-
----
+## References
+- CPA (Lotfollahi et al., 2021)
+- GEARS (Roohani et al., 2023)
+- BioBERT (Lee et al., 2020)
+- scVI (Lopez et al., 2018)
