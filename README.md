@@ -1,4 +1,4 @@
-**Gene-Semantic Bridge: Enhancing Cell Perturbation Prediction via LLM-Knowledge Embeddings**
+## Gene-Semantic Bridge: Enhancing Cell Perturbation Prediction via LLM-Knowledge Embeddings
 
 KA-CVAE is a knowledge-augmented conditional variational autoencoder designed to predict single-cell transcriptomic responses to single and combinatorial CRISPR perturbations. The project bridges the gap between biological knowledge and perturbation modeling by integrating **BioBERT-derived semantic gene embeddings** with learnable gene identity representations.
 
